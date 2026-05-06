@@ -608,6 +608,7 @@
             const user = transcript.toLowerCase().replace(/[^\w\s]/g, '');
             const score = Math.min(100, Math.floor((user.split(' ').filter(w => original.includes(w)).length / original.split(' ').length) * 100) + 15);
 
+            if(window.saveLeapScore) window.saveLeapScore('pronunciationScore_' + activeSentenceElement.dataset.id, score);
             showMessage(`
         <h3 class="text-2xl font-bold mb-4">評価結果</h3>
         <p class="text-7xl font-bold text-blue-600 mb-4">${score}<span class="text-2xl">点</span></p>
@@ -622,6 +623,7 @@
 
             function nextQuestion() {
                 if (currentIdx >= questions.length) {
+                    if(window.saveLeapScore) window.saveLeapScore('quizScore', Math.round(score / questions.length * 100));
                     quizContent.innerHTML = `<h3 class="text-3xl font-bold mb-4">結果: ${score}/${questions.length}</h3><p class="text-6xl text-purple-600 font-bold">${Math.round(score / questions.length * 100)}点</p>`;
                     return;
                 }
@@ -784,15 +786,53 @@
         document.addEventListener('DOMContentLoaded', renderChapter);
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const appId = window.location.pathname.split('/').pop().replace('.html', '');
-            let progress = JSON.parse(localStorage.getItem('leap_progress') || '{}');
-            if (!progress[appId]) {
-                progress[appId] = { started: true };
-                localStorage.setItem('leap_progress', JSON.stringify(progress));
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNrvDMnlN_geijgRguQrolnTIZ_rdZwyw",
+            authDomain: "sokudoku-stories-db.firebaseapp.com",
+            projectId: "sokudoku-stories-db",
+            storageBucket: "sokudoku-stories-db.firebasestorage.app",
+            messagingSenderId: "979353290932",
+            appId: "1:979353290932:web:f0c512cfbe64a7afe36fe1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const appId = window.location.pathname.split('/').pop().replace('.html', '');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUser = user;
+                const docRef = doc(db, "leap_users", user.uid, "progress", appId);
+                setDoc(docRef, {
+                    started: true,
+                    lastAccessed: new Date().toISOString()
+                }, { merge: true }).catch(console.error);
+                
+                // Update profile just in case
+                setDoc(doc(db, "leap_users", user.uid), {
+                    displayName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    lastLogin: new Date().toISOString()
+                }, { merge: true }).catch(e => console.error(e));
             }
         });
+
+        window.saveLeapScore = (type, score) => {
+            if (window.currentUser) {
+                const docRef = doc(db, "leap_users", window.currentUser.uid, "progress", appId);
+                const updateData = {};
+                updateData[type] = score;
+                setDoc(docRef, updateData, { merge: true }).catch(console.error);
+            }
+        };
     </script>
 
 </body>
