@@ -855,52 +855,65 @@
             let baseWord = answer.replace(/[～AB]/g, '').replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
             let searchWords = [];
             
-            // Try the exact cleaned answer first
             if (baseWord.length > 0) searchWords.push(baseWord);
             
-            const words = baseWord.split(/\s+/).filter(w => w.length > 0 && /^[a-zA-Z]+$/.test(w));
-            if (words.length > 0) {
-                searchWords.push(words[0]);
-                const longest = words.reduce((a, b) => a.length > b.length ? a : b, "");
-                if (longest !== words[0]) searchWords.push(longest);
-                
-                const irregulars = {
-                    'write': ['wrote', 'written'], 'speak': ['spoke', 'spoken'], 'say': ['said'], 'tell': ['told'],
-                    'see': ['saw', 'seen'], 'hear': ['heard'], 'take': ['took', 'taken'], 'meet': ['met'],
-                    'feel': ['felt'], 'think': ['thought'], 'know': ['knew', 'known'], 'choose': ['chose', 'chosen'],
-                    'leave': ['left'], 'make': ['made'], 'catch': ['caught'], 'find': ['found'], 'buy': ['bought'],
-                    'bring': ['brought'], 'teach': ['taught'], 'understand': ['understood'], 'build': ['built'],
-                    'send': ['sent'], 'spend': ['spent'], 'lose': ['lost'], 'sleep': ['slept'], 'keep': ['kept'],
-                    'do': ['did', 'done'], 'go': ['went', 'gone'], 'come': ['came'], 'run': ['ran'],
-                    'give': ['gave', 'given'], 'get': ['got', 'gotten'], 'forget': ['forgot', 'forgotten'],
-                    'begin': ['began', 'begun'], 'drink': ['drank', 'drunk'], 'swim': ['swam', 'swum'],
-                    'sing': ['sang', 'sung'], 'ring': ['rang', 'rung'], 'drive': ['drove', 'driven'],
-                    'ride': ['rode', 'ridden'], 'eat': ['ate', 'eaten'], 'fall': ['fell', 'fallen'],
-                    'hold': ['held'], 'stand': ['stood'], 'sit': ['sat'], 'win': ['won'], 'pay': ['paid'],
-                    'sell': ['sold'], 'break': ['broke', 'broken'], 'wear': ['wore', 'worn'],
-                    'grow': ['grew', 'grown'], 'fly': ['flew', 'flown'], 'blow': ['blew', 'blown'],
-                    'draw': ['drew', 'drawn'], 'throw': ['threw', 'thrown'], 'hide': ['hid', 'hidden'],
-                    'fight': ['fought'], 'feed': ['fed'], 'strike': ['struck'], 'wake': ['woke', 'woken'],
-                    'bear': ['bore', 'born'], 'beat': ['beat', 'beaten'], 'bind': ['bound'], 'bleed': ['bled'],
-                    'breed': ['bred'], 'tear': ['tore', 'torn'], 'sweep': ['swept'], 'weep': ['wept'],
-                    'bend': ['bent'], 'lend': ['lent'], 'mean': ['meant'], 'lead': ['led'], 'shoot': ['shot']
-                };
-                
-                if (irregulars[words[0].toLowerCase()]) {
-                    searchWords.push(...irregulars[words[0].toLowerCase()]);
+            if (baseWord === 'oneself') {
+                searchWords.push('myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'yourselves', 'themselves');
+            } else {
+                const words = baseWord.split(/\s+/).filter(w => w.length > 0 && /^[a-zA-Z]+$/.test(w));
+                if (words.length > 0) {
+                    let w = words[0].toLowerCase();
+                    searchWords.push(w);
+                    // Add regular forms
+                    searchWords.push(w + 's', w + 'es', w + 'd', w + 'ed', w + 'ing');
+                    if (w.endsWith('e')) searchWords.push(w.slice(0, -1) + 'ing');
+                    if (w.endsWith('y')) searchWords.push(w.slice(0, -1) + 'ies', w.slice(0, -1) + 'ied');
+                    if (w.length > 2) {
+                        const last = w.slice(-1);
+                        searchWords.push(w + last + 'ed', w + last + 'ing');
+                    }
+                    
+                    const irregulars = {
+                        'write': ['wrote', 'written'], 'speak': ['spoke', 'spoken'], 'say': ['said'], 'tell': ['told'],
+                        'see': ['saw', 'seen'], 'hear': ['heard'], 'take': ['took', 'taken'], 'meet': ['met'],
+                        'feel': ['felt'], 'think': ['thought'], 'know': ['knew', 'known'], 'choose': ['chose', 'chosen'],
+                        'leave': ['left'], 'make': ['made'], 'catch': ['caught'], 'find': ['found'], 'buy': ['bought'],
+                        'bring': ['brought'], 'teach': ['taught'], 'understand': ['understood'], 'build': ['built'],
+                        'send': ['sent'], 'spend': ['spent'], 'lose': ['lost'], 'sleep': ['slept'], 'keep': ['kept'],
+                        'do': ['did', 'done'], 'go': ['went', 'gone'], 'come': ['came'], 'run': ['ran'],
+                        'give': ['gave', 'given'], 'get': ['got', 'gotten'], 'forget': ['forgot', 'forgotten'],
+                        'begin': ['began', 'begun'], 'drink': ['drank', 'drunk'], 'swim': ['swam', 'swum'],
+                        'sing': ['sang', 'sung'], 'ring': ['rang', 'rung'], 'drive': ['drove', 'driven'],
+                        'ride': ['rode', 'ridden'], 'eat': ['ate', 'eaten'], 'fall': ['fell', 'fallen'],
+                        'hold': ['held'], 'stand': ['stood'], 'sit': ['sat'], 'win': ['won'], 'pay': ['paid'],
+                        'sell': ['sold'], 'break': ['broke', 'broken'], 'wear': ['wore', 'worn'],
+                        'grow': ['grew', 'grown'], 'fly': ['flew', 'flown'], 'blow': ['blew', 'blown'],
+                        'draw': ['drew', 'drawn'], 'throw': ['threw', 'thrown'], 'hide': ['hid', 'hidden'],
+                        'fight': ['fought'], 'feed': ['fed'], 'strike': ['struck'], 'wake': ['woke', 'woken'],
+                        'bear': ['bore', 'born'], 'beat': ['beat', 'beaten'], 'bind': ['bound'], 'bleed': ['bled'],
+                        'breed': ['bred'], 'tear': ['tore', 'torn'], 'sweep': ['swept'], 'weep': ['wept'],
+                        'bend': ['bent'], 'lend': ['lent'], 'mean': ['meant'], 'lead': ['led'], 'shoot': ['shot']
+                    };
+                    
+                    if (irregulars[w]) searchWords.push(...irregulars[w]);
                 }
             }
 
+            // We only want to replace the FIRST matching word so we don't mess up multiple instances of the same word unless we use replaceAll.
+            // Actually replaceAll with regex /g is better if the word appears multiple times.
             for (let actualWord of searchWords) {
                 if (!actualWord) continue;
-                
                 try {
-                    const regex = new RegExp(`\\b${actualWord}\\b`, 'i');
+                    const regex = new RegExp(`\\b${actualWord}\\b`, 'gi');
                     if (regex.test(enSentence)) {
                         return enSentence.replace(regex, match => `<span class="answer-span">${match}</span><span class="underline-span">${blank}</span>`);
                     }
                 } catch (e) { }
-
+            }
+            
+            // Substring fallback
+            for (let actualWord of searchWords) {
+                if (!actualWord) continue;
                 if (enSentence.toLowerCase().includes(actualWord.toLowerCase())) {
                     const index = enSentence.toLowerCase().indexOf(actualWord.toLowerCase());
                     if (index !== -1) {
@@ -911,6 +924,7 @@
                     }
                 }
             }
+
             return enSentence;
         }
 
