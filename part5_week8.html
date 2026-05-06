@@ -1013,6 +1013,12 @@
             const questions = [...chapterData].sort(() => 0.5 - Math.random()).slice(0, 10);
             let currentIdx = 0, score = 0;
 
+            function extractBlankWord(item) {
+                const formatted = formatEnglishSentence(item);
+                const match = formatted.match(/<span class="answer-span">([\s\S]*?)<\/span>/);
+                return match ? match[1].trim() : item.answer;
+            }
+
             function nextQuestion() {
                 if (currentIdx >= questions.length) {
                     if(window.saveLeapScore) window.saveLeapScore('quizScore', Math.round(score / questions.length * 100));
@@ -1020,19 +1026,38 @@
                     return;
                 }
                 const q = questions[currentIdx];
-                const options = [q.answer, ...chapterData.map(d => d.answer).filter(a => a !== q.answer).sort(() => 0.5 - Math.random()).slice(0, 3)].sort();
+                const correctWord = extractBlankWord(q);
+                
+                const formattedQ = formatEnglishSentence(q);
+                let displaySentence = formattedQ.replace(/<span class="answer-span">[\s\S]*?<\/span><span class="underline-span">__________<\/span>/g, '__________');
+                if (displaySentence === q.en && q.en) {
+                    displaySentence = q.en;
+                } else if (!q.en) {
+                    displaySentence = "(例文なし)";
+                }
+
+                const allOtherWords = chapterData.filter(d => d.id !== q.id).map(d => extractBlankWord(d));
+                const uniqueOtherWords = [...new Set(allOtherWords)].filter(w => w !== correctWord);
+                const distractors = uniqueOtherWords.sort(() => 0.5 - Math.random()).slice(0, 3);
+                
+                const options = [correctWord, ...distractors].sort(() => 0.5 - Math.random());
 
                 quizContent.innerHTML = `
-            <p class="mb-2">問題 ${currentIdx + 1}/10</p>
-            <p class="text-lg font-bold mb-4">${q.ja}</p>
+            <p class="mb-2 text-gray-500">問題 ${currentIdx + 1}/10</p>
+            <p class="text-lg font-bold mb-2 text-gray-700">${q.ja}</p>
+            <p class="text-xl font-bold mb-6 font-english text-blue-800">${displaySentence}</p>
             <div class="grid grid-cols-1 gap-3">
-                ${options.map(opt => `<button class="quiz-opt p-3 border rounded-lg hover:bg-blue-50 font-english">${opt}</button>`).join('')}
+                ${options.map(opt => `<button class="quiz-opt p-3 border-2 border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 font-english transition-colors">${opt}</button>`).join('')}
             </div>
         `;
                 document.querySelectorAll('.quiz-opt').forEach(btn => {
                     btn.onclick = () => {
-                        if (btn.innerText === q.answer) { btn.classList.add('bg-green-200'); score++; }
-                        else btn.classList.add('bg-red-200');
+                        if (btn.innerText === correctWord) { btn.classList.add('bg-green-200', 'border-green-400'); score++; }
+                        else { btn.classList.add('bg-red-200', 'border-red-400'); }
+                        
+                        // Disable buttons
+                        document.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+                        
                         setTimeout(() => { currentIdx++; nextQuestion(); }, 1000);
                     };
                 });
