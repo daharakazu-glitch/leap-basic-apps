@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LEAP 学習アプリ (P2 W8)</title>
+    <title>LEAP Basic学習アプリ (P2 W8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Tinos:wght@700&display=swap');
@@ -98,8 +98,8 @@
 
     <div id="app-container" class="container mx-auto p-4 md:p-8 max-w-4xl">
         <header class="text-center mb-8 bg-blue-500 p-4 rounded-xl shadow-lg">
-            <h1 class="text-2xl md:text-3xl font-bold text-white">LEAP 学習アプリ</h1>
-            <h2 id="app-subtitle" class="text-xl md:text-2xl font-bold text-white">Part 2 Week 8</h2>
+            <h1 class="text-2xl md:text-3xl font-bold text-white">LEAP Basic学習アプリ</h1>
+            <h2 id="app-subtitle" class="text-xl md:text-2xl font-bold text-white">Part 1 Week 1 (No.1-42)</h2>
         </header>
 
         <main class="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-28">
@@ -476,7 +476,7 @@
             <input type="checkbox" class="sentence-checkbox mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-id="${item.id}">
             <span class="text-sm font-bold text-gray-400 w-16">${item.id}</span>
             <div class="flex-1 cursor-pointer">
-                <p class="mb-2 text-gray-700">${item.ja}</p>
+                ${item.ja ? `<p class="mb-2 text-gray-700">${item.ja}</p>` : ""}
                 <p class="font-english">${englishSentenceHtml}</p>
                 <div class="explanation mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-gray-700 rounded-r-lg">
                 ${item.explanation}
@@ -586,19 +586,7 @@
         // --- PDF Print Logic ---
         function openPrintWindow(content, title) {
             const win = window.open('', '_blank');
-            win.document.write(`<html><head><title>${title}</title><style>body{font-family:sans-serif;padding:40px} .list{column-count:2} li{margin-bottom:10px} .ans{margin-top:50px;border-top:1px solid #000;padding-top:20px}</style></head><body><h1>${title}</h1>${content}
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const appId = window.location.pathname.split('/').pop().replace('.html', '');
-            let progress = JSON.parse(localStorage.getItem('leap_progress') || '{}');
-            if (!progress[appId]) {
-                progress[appId] = { started: true };
-                localStorage.setItem('leap_progress', JSON.stringify(progress));
-            }
-        });
-    </script>
-
-</body></html>`);
+            win.document.write(`<html><head><title>${title}</title><style>body{font-family:sans-serif;padding:40px} .list{column-count:2} li{margin-bottom:10px} .ans{margin-top:50px;border-top:1px solid #000;padding-top:20px}</style></head><body><h1>${title}</h1>${content}</body></html>`);
             win.document.close();
             setTimeout(() => { win.focus(); win.print(); }, 500);
         }
@@ -612,7 +600,7 @@
             const answer = item.answer;
             const blank = '__________';
 
-            if (!enSentence) return '<span class="text-gray-400">（例文なし）</span>';
+            if (!enSentence) return `<span class="answer-span text-3xl">${answer}</span>`;
 
             let actualWord = item.target_word;
             if (!actualWord) {
