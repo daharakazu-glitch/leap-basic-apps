@@ -73,6 +73,8 @@
                 apps.forEach(app => {
                     const link = document.createElement('a');
                     link.href = app.file_name;
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
                     const appId = app.file_name.replace('.html', '');
                     
                     link.innerHTML = `<strong>${app.week}</strong>`;
